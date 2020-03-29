@@ -1,7 +1,36 @@
 version: '3' # composeファイルのバーション指定
 services:
-  app: # service名
-    build: . # ビルドに使用するDockerfileがあるディレクトリ指定
-    tty: true # コンテナの起動永続化
-    volumes:
-      - .:/go/src/work # マウントディレクトリ指定
+
+  # postgres サービス
+    postgres:
+      # コンテナの名前
+      container_name: postgres
+      # Dockerfile のディレクトリパス
+      build:  # ビルドに使用するDockerfileがあるディレクトリ指定
+        context: .
+        dockerfile: ./docker/postgres/Dockerfile
+      # postgres 設定
+      environment:
+        - POSTGRES_USER=app_user
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=app_db
+    
+    # golang アプリケーション
+      app:
+        container_name: app
+        # postgres をビルドした後に app をビルド
+        depends_on:
+          - postgres
+        # Dockerfile を指定
+        build:
+          context: .
+          dockerfile: ./docker/golang/Dockerfile
+        # GOPATHを指定
+        environment:
+          - GOPATH=/go
+        # フォルダ共有（ホストOS:コンテナ）
+        volumes:
+          - ./go:/go/src/app/go/
+        # docker-compose run 実行時に実行されるコマンド
+        command: go run main.go
+
