@@ -8,7 +8,7 @@ services:
       # Dockerfile のディレクトリパス
       build:  # ビルドに使用するDockerfileがあるディレクトリ指定
         context: .
-        dockerfile: ./docker/postgres/Dockerfile
+        dockerfile: ./postgres/Dockerfile
       # postgres 設定
       environment:
         - POSTGRES_USER=app_user
@@ -16,21 +16,21 @@ services:
         - POSTGRES_DB=app_db
     
     # golang アプリケーション
-      app:
-        container_name: app
-        # postgres をビルドした後に app をビルド
-        depends_on:
-          - postgres
-        # Dockerfile を指定
-        build:
-          context: .
-          dockerfile: ./docker/golang/Dockerfile
-        # GOPATHを指定
-        environment:
-          - GOPATH=/go
-        # フォルダ共有（ホストOS:コンテナ）
-        volumes:
-          - ./go:/go/src/app/go/
-        # docker-compose run 実行時に実行されるコマンド
-        command: go run main.go
+    app:
+      container_name: app
+      # postgres をビルドした後に app をビルド
+      depends_on:
+        - postgres
+      # Dockerfile を指定
+      build:
+        context: .
+        dockerfile: ./golang/Dockerfile
+      # GOPATHを指定
+      environment:
+        - GOPATH=/go
+      # フォルダ共有（ホストOS:コンテナ）
+      volumes:
+        - ./go:/go/src/app/go/
+      # docker-compose run 実行時に実行されるコマンド
+      command: go run main.go
 
